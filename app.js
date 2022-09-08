@@ -6,6 +6,7 @@ const audio = $("#audio");
 const cd = $(".cd");
 const playBtn = $(".btn-toogle-play");
 const player = $(".player");
+const progress = $("#progress");
 
 const app = {
   currentIndex: 0,
@@ -148,7 +149,26 @@ const app = {
         player.classList.remove("playing");
       };
     };
+
+    //khi tiền độ bài hát thay đôi
+
+    audio.ontimeupdate = function () {
+      if (audio.duration) {
+        
+        //audio.duration độ dài của song được tính bằng giây
+        //audio.currentTime trả về độ dài hiện tại của audio được tính bằng giây
+        console.log( audio.currentTime);
+        const progressPercent = Math.floor(audio.currentTime / audio.duration * 100);
+        progress.value = progressPercent
+      }
+    };
+
+    //xử lí khi tua xong
+    progress.onchange = function(e){
+      audio.currentTime = audio.duration/ 100 * e.target.value
+    }
   },
+
   loadCurrentSong: function () {
     heading.textContent = this.currentSong.name;
     cdthumb.style.backgroundImage = `url('${this.currentSong.image}')`;
