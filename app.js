@@ -1,8 +1,15 @@
 const $ = document.querySelector.bind(document);
 const $$ = document.querySelectorAll.bind(document);
+const heading = $("header h2");
+const cdthumb = $(".cd-thumb");
+const audio = $("#audio");
+const cd = $(".cd");
+const playBtn = $(".btn-toogle-play");
+const player = $(".player");
 
 const app = {
   currentIndex: 0,
+  isPlaying: false,
   songs: [
     {
       name: "Tòng phu",
@@ -97,14 +104,18 @@ const app = {
 
     $(".playlist").innerHTML = htmls.join("");
   },
-  defineProperties: function() {
+  defineProperties: function () {
+    Object.defineProperty(this, "currentSong", {
+      get: function () {
+        return this.songs[this.currentIndex];
+      },
+    });
+  },
 
-  }
-  ,
   handleEvents: function () {
-    const cd = $(".cd");
+    const _this = this;
     const cdWidth = cd.offsetWidth;
-
+    //xử lí phóng to thu nhỏ cv
     document.onscroll = function () {
       const scrollTop = window.scrollY || document.documentElement.scrollTop;
 
@@ -117,11 +128,44 @@ const app = {
       cd.style.width = newcdWidth > 0 ? newcdWidth + "px" : 0;
       cd.style.opacity = newcdWidth / cdWidth;
     };
+    //xử lí khi click play
+    playBtn.onclick = function () {
+      if (_this.isPlaying) {
+        audio.pause();
+      } else {
+        audio.play();
+      }
+
+      //khi song đc play
+      audio.onplay = function () {
+        _this.isPlaying = true;
+        player.classList.add("playing");
+      };
+
+      //khi song đc pause
+      audio.onpause = function () {
+        _this.isPlaying = false;
+        player.classList.remove("playing");
+      };
+    };
+  },
+  loadCurrentSong: function () {
+    heading.textContent = this.currentSong.name;
+    cdthumb.style.backgroundImage = `url('${this.currentSong.image}')`;
+    audio.src = this.currentSong.path;
   },
   start: function () {
-    this.handleEvents();
-    this.render();
+    // định nghĩa các thuộc tính trong object
     this.defineProperties();
+
+    //lắng nghe xử lí các sự kiện
+    this.handleEvents();
+
+    //tải thông tin bài hất đầu tiền vào UI khi chạy ứng dụng
+
+    this.loadCurrentSong();
+
+    this.render();
   },
 };
 
