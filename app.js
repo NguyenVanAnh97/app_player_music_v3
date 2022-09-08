@@ -2,6 +2,7 @@ const $ = document.querySelector.bind(document);
 const $$ = document.querySelectorAll.bind(document);
 
 const app = {
+  currentIndex: 0,
   songs: [
     {
       name: "Tòng phu",
@@ -96,8 +97,31 @@ const app = {
 
     $(".playlist").innerHTML = htmls.join("");
   },
+  defineProperties: function() {
+
+  }
+  ,
+  handleEvents: function () {
+    const cd = $(".cd");
+    const cdWidth = cd.offsetWidth;
+
+    document.onscroll = function () {
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+
+      const newcdWidth = cdWidth - scrollTop;
+
+      //console.log("kích thức cd: " + cdWidth);
+      //console.log("quận trang: " + scrollTop);
+      //console.log("kêt quả:" + newcdWidth);
+
+      cd.style.width = newcdWidth > 0 ? newcdWidth + "px" : 0;
+      cd.style.opacity = newcdWidth / cdWidth;
+    };
+  },
   start: function () {
+    this.handleEvents();
     this.render();
+    this.defineProperties();
   },
 };
 
