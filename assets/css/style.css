@@ -3,7 +3,7 @@
     --text-color: #333;
 }
 
-*{
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -33,7 +33,7 @@ html {
     display: inline-block;
 }
 
-.player.playing .icon-play{
+.player.playing .icon-play {
     display: none;
 }
 
@@ -52,7 +52,7 @@ header {
     margin-bottom: 10px;
 }
 
-header > h4 {
+header>h4 {
     color: var(--primary-color);
     font-size: 12px;
 }
@@ -84,6 +84,11 @@ header > h4 {
     padding: 18px;
     font-size: 18px;
 }
+
+.control .btn.active {
+    color: var(--primary-color);
+}
+
 
 .control .btn-toogle-play {
     background-color: var(--primary-color);

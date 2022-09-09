@@ -7,10 +7,16 @@ const cd = $(".cd");
 const playBtn = $(".btn-toogle-play");
 const player = $(".player");
 const progress = $("#progress");
+const nextBtn = $(".btn-next");
+const preBtn = $(".btn-pre");
+const randomBtn = $(".btn-random");
+const repeatBtn = $(".btn-repeat");
 
 const app = {
-  currentIndex: 0,
+  currentIndex: -1,
   isPlaying: false,
+  isRandom: false,
+  isRepeat: false,
   songs: [
     {
       name: "Tòng phu",
@@ -87,8 +93,8 @@ const app = {
   ],
 
   render: function () {
-    const htmls = this.songs.map((song) => {
-      return `<div class="song">
+    const htmls = this.songs.map((song, index) => {
+      return `<div class="song ${index === this.currentIndex ? 'active' : ''}">
     
       <div class="thumb" style="background-image: url('${song.image}')">
                    
@@ -116,6 +122,19 @@ const app = {
   handleEvents: function () {
     const _this = this;
     const cdWidth = cd.offsetWidth;
+    // xử lí CD quay / dừng
+
+    const cdThumbAnimate = cdthumb.animate(
+      [
+        {
+          transform: "rotate(360deg)",
+        },
+      ],
+      { duration: 10000, iterations: Infinity }
+    );
+
+    cdThumbAnimate.pause();
+
     //xử lí phóng to thu nhỏ cv
     document.onscroll = function () {
       const scrollTop = window.scrollY || document.documentElement.scrollTop;
@@ -141,12 +160,14 @@ const app = {
       audio.onplay = function () {
         _this.isPlaying = true;
         player.classList.add("playing");
+        cdThumbAnimate.play();
       };
 
       //khi song đc pause
       audio.onpause = function () {
         _this.isPlaying = false;
         player.classList.remove("playing");
+        cdThumbAnimate.pause();
       };
     };
 
@@ -154,32 +175,100 @@ const app = {
 
     audio.ontimeupdate = function () {
       if (audio.duration) {
-        
         //audio.duration độ dài của song được tính bằng giây
         //audio.currentTime trả về độ dài hiện tại của audio được tính bằng giây
-        console.log( audio.currentTime);
-        const progressPercent = Math.floor(audio.currentTime / audio.duration * 100);
-        progress.value = progressPercent
+        const progressPercent = Math.floor(
+          (audio.currentTime / audio.duration) * 100
+        );
+        progress.value = progressPercent;
       }
     };
 
-    //xử lí khi tua xong
-    progress.onchange = function(e){
-      audio.currentTime = audio.duration/ 100 * e.target.value
-    }
-  },
+    //xử lí khi tua song
+    progress.onchange = function (e) {
+      audio.currentTime = (audio.duration / 100) * e.target.value;
+    };
 
+    //khi next song
+    nextBtn.onclick = function () {
+      if (_this.isRandom) {
+        _this.playRandomSong();
+      } else {
+        _this.nextSong();
+      }
+      audio.play();
+      _this.render()
+    };
+
+    //khi prev song
+    preBtn.onclick = function () {
+      if (_this.isRandom) {
+        _this.playRandomSong();
+      } else {
+        _this.preSong();
+      }
+      audio.play();
+      _this.render()
+    };
+    // xử lí bật / tắt random
+    randomBtn.onclick = function () {
+      _this.isRandom = !_this.isRandom;
+      this.classList.toggle("active", _this.isRandom); // nếu isRandom = true thì add class active ko thì xóa đi (thay đổi được class và trạng thái của nút)
+    };
+
+    // xử lí lặp lại một song
+    repeatBtn.onclick = function () {
+      _this.isRepeat = !_this.isRepeat;
+      repeatBtn.classList.toggle("active", _this.isRepeat);
+    };
+
+    //xử lí next song khi audio ended
+    audio.onended = function () {
+      if(_this.isRepeat){
+        audio.play()
+      }else {
+        nextBtn.click()
+      }
+     
+    };
+  },
+  nextSong: function () {
+    this.currentIndex++;
+    if (this.currentIndex >= this.songs.length) {
+      this.currentIndex = 0;
+    }
+    this.loadCurrentSong();
+  },
+  preSong: function () {
+    this.currentIndex--;
+    if (this.currentIndex < 0) {
+      this.currentIndex = this.songs.length - 1;
+    }
+    this.loadCurrentSong();
+  },
+  playRandomSong: function () {
+    let newIndex;
+    do {
+      newIndex = Math.floor(Math.random() * this.songs.length);
+    } while (newIndex === this.currentIndex);
+    this.currentIndex = newIndex;
+    this.loadCurrentSong();
+  },
   loadCurrentSong: function () {
     heading.textContent = this.currentSong.name;
     cdthumb.style.backgroundImage = `url('${this.currentSong.image}')`;
     audio.src = this.currentSong.path;
   },
+
   start: function () {
     // định nghĩa các thuộc tính trong object
     this.defineProperties();
 
     //lắng nghe xử lí các sự kiện
     this.handleEvents();
+
+    //next bài hát
+    this.nextSong();
 
     //tải thông tin bài hất đầu tiền vào UI khi chạy ứng dụng
 
