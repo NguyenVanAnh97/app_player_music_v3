@@ -271,7 +271,6 @@ const app = {
     this.nextSong();
 
     //tải thông tin bài hất đầu tiền vào UI khi chạy ứng dụng
-
     this.loadCurrentSong();
 
     this.render();
