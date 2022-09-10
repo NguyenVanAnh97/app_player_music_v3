@@ -1,5 +1,9 @@
 const $ = document.querySelector.bind(document);
 const $$ = document.querySelectorAll.bind(document);
+
+const PLAYER_STORAGE_KEY = "KEY_PLAY";
+
+const playlist = $(".playlist");
 const heading = $("header h2");
 const cdthumb = $(".cd-thumb");
 const audio = $("#audio");
@@ -17,6 +21,7 @@ const app = {
   isPlaying: false,
   isRandom: false,
   isRepeat: false,
+  config: JSON.parse(localStorage.getItem(PLAYER_STORAGE_KEY)) || {},
   songs: [
     {
       name: "Tòng phu",
@@ -91,10 +96,16 @@ const app = {
       image: "./assets/img/Sài Gòn Đau Lòng Quá.jpg",
     },
   ],
+  setConfig: function (key, value) {
+    this.config[key] = value;
+    localStorage.setItem(PLAYER_STORAGE_KEY, JSON.stringify(this.config));
+  },
 
   render: function () {
     const htmls = this.songs.map((song, index) => {
-      return `<div class="song ${index === this.currentIndex ? 'active' : ''}">
+      return `<div class="song ${
+        index === this.currentIndex ? "active" : ""
+      }" data-index="${index}">
     
       <div class="thumb" style="background-image: url('${song.image}')">
                    
@@ -109,7 +120,7 @@ const app = {
     </div>`;
     });
 
-    $(".playlist").innerHTML = htmls.join("");
+    playlist.innerHTML = htmls.join("");
   },
   defineProperties: function () {
     Object.defineProperty(this, "currentSong", {
@@ -117,6 +128,7 @@ const app = {
         return this.songs[this.currentIndex];
       },
     });
+   
   },
 
   handleEvents: function () {
@@ -196,8 +208,10 @@ const app = {
       } else {
         _this.nextSong();
       }
+      player.classList.add("playing");
       audio.play();
-      _this.render()
+      _this.render();
+     
     };
 
     //khi prev song
@@ -206,31 +220,64 @@ const app = {
         _this.playRandomSong();
       } else {
         _this.preSong();
+        
       }
       audio.play();
-      _this.render()
+      _this.render();
+      _this.scrollToActiveSong();
     };
     // xử lí bật / tắt random
     randomBtn.onclick = function () {
       _this.isRandom = !_this.isRandom;
+      _this.setConfig("isRandom", _this.isRandom);
       this.classList.toggle("active", _this.isRandom); // nếu isRandom = true thì add class active ko thì xóa đi (thay đổi được class và trạng thái của nút)
     };
 
     // xử lí lặp lại một song
     repeatBtn.onclick = function () {
       _this.isRepeat = !_this.isRepeat;
-      repeatBtn.classList.toggle("active", _this.isRepeat);
+      _this.setConfig("isRepeat", _this.isRepeat);  
+      this.classList.toggle("active", _this.isRepeat);
     };
 
     //xử lí next song khi audio ended
     audio.onended = function () {
-      if(_this.isRepeat){
-        audio.play()
-      }else {
-        nextBtn.click()
+      if (_this.isRepeat) {
+        audio.play();
+      } else {
+        nextBtn.click();
       }
-     
     };
+
+    // lắng nghe hành vi click vào playlist
+    playlist.onclick = function (e) {
+      const songNode = e.target.closest(".song:not(.active)");
+      if (songNode || e.target.closest(".option")) {
+        //xử lí khi click vào song
+        if (songNode) {
+          _this.currentIndex = Number(songNode.dataset.index);
+          _this.loadCurrentSong();
+          _this.render();
+          audio.play();
+        }
+
+        //xử lí khi click vào option
+        if (e.target.closest(".song:not(.option)")) {
+        }
+      }
+    };
+  },
+  scrollToActiveSong: function () {
+    setTimeout(() => {
+      $(".song.active").scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 300);
+  },
+  loadConfig: function(){
+    this.isRandom = this.config.isRandom
+    this.isRepeat = this.config.isRepeat
   },
   nextSong: function () {
     this.currentIndex++;
@@ -261,6 +308,8 @@ const app = {
   },
 
   start: function () {
+    // gán cấu hình từ config vào ứng dụng
+    this.loadConfig()
     // định nghĩa các thuộc tính trong object
     this.defineProperties();
 
@@ -274,6 +323,9 @@ const app = {
     this.loadCurrentSong();
 
     this.render();
+
+    randomBtn.classList.toggle('active', this.isRandom)
+    repeatBtn.classList.toggle('active', this.isRepeat)
   },
 };
 
