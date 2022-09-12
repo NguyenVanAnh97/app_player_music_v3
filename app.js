@@ -15,6 +15,8 @@ const nextBtn = $(".btn-next");
 const preBtn = $(".btn-pre");
 const randomBtn = $(".btn-random");
 const repeatBtn = $(".btn-repeat");
+const curTime = $(".currTime");
+const durTime = $(".durrTime");
 
 const app = {
   currentIndex: -1,
@@ -122,14 +124,13 @@ const app = {
 
     playlist.innerHTML = htmls.join("");
   },
-  defineProperties : function(){
-    Object.defineProperty(this, 'currentSong', {
-      get : function(){
-      return this.songs[this.currentIndex];
-      }
-    })
-  }
- ,
+  defineProperties: function () {
+    Object.defineProperty(this, "currentSong", {
+      get: function () {
+        return this.songs[this.currentIndex];
+      },
+    });
+  },
 
   handleEvents: function () {
     const _this = this;
@@ -183,9 +184,9 @@ const app = {
     };
 
     //khi tiền độ bài hát thay đôi
-
     audio.ontimeupdate = function () {
       if (audio.duration) {
+        console.log(audio.duration);
         //audio.duration độ dài của song được tính bằng giây
         //audio.currentTime trả về độ dài hiện tại của audio được tính bằng giây
         const progressPercent = Math.floor(
@@ -194,7 +195,6 @@ const app = {
         progress.value = progressPercent;
       }
     };
-
     //xử lí khi tua song
     progress.onchange = function (e) {
       audio.currentTime = (audio.duration / 100) * e.target.value;
@@ -304,6 +304,23 @@ const app = {
     audio.src = this.currentSong.path;
   },
 
+  formatTimer: function (num) {
+    let min = Math.floor(num / 60);
+    let sec = Math.floor(num - min * 60);
+    if (sec < 10) return `${min}: 0${sec}`;
+    else return `${min}:${sec}`;
+  },
+
+  displayTimer: function () {
+    const _this = this;
+    audio.onloadedmetadata = function () {
+      audio.ontimeupdate = function () {
+        curTime.textContent = _this.formatTimer(audio.currentTime);
+        durTime.textContent = _this.formatTimer(audio.duration);
+      };
+    };
+  },
+
   start: function () {
     // gán cấu hình từ config vào ứng dụng
     this.loadConfig();
@@ -318,6 +335,8 @@ const app = {
 
     //tải thông tin bài hất đầu tiền vào UI khi chạy ứng dụng
     this.loadCurrentSong();
+
+    setInterval(this.displayTimer(), 500);
 
     this.render();
 
