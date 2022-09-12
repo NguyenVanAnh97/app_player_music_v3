@@ -122,14 +122,14 @@ const app = {
 
     playlist.innerHTML = htmls.join("");
   },
-  defineProperties: function () {
-    Object.defineProperty(this, "currentSong", {
-      get: function () {
-        return this.songs[this.currentIndex];
-      },
-    });
-   
-  },
+  defineProperties : function(){
+    Object.defineProperty(this, 'currentSong', {
+      get : function(){
+      return this.songs[this.currentIndex];
+      }
+    })
+  }
+ ,
 
   handleEvents: function () {
     const _this = this;
@@ -150,7 +150,6 @@ const app = {
     //xử lí phóng to thu nhỏ cv
     document.onscroll = function () {
       const scrollTop = window.scrollY || document.documentElement.scrollTop;
-
       const newcdWidth = cdWidth - scrollTop;
 
       //console.log("kích thức cd: " + cdWidth);
@@ -208,10 +207,9 @@ const app = {
       } else {
         _this.nextSong();
       }
-      player.classList.add("playing");
       audio.play();
       _this.render();
-     
+      _this.scrollToActiveSong();
     };
 
     //khi prev song
@@ -220,7 +218,6 @@ const app = {
         _this.playRandomSong();
       } else {
         _this.preSong();
-        
       }
       audio.play();
       _this.render();
@@ -236,7 +233,7 @@ const app = {
     // xử lí lặp lại một song
     repeatBtn.onclick = function () {
       _this.isRepeat = !_this.isRepeat;
-      _this.setConfig("isRepeat", _this.isRepeat);  
+      _this.setConfig("isRepeat", _this.isRepeat);
       this.classList.toggle("active", _this.isRepeat);
     };
 
@@ -275,9 +272,9 @@ const app = {
       });
     }, 300);
   },
-  loadConfig: function(){
-    this.isRandom = this.config.isRandom
-    this.isRepeat = this.config.isRepeat
+  loadConfig: function () {
+    this.isRandom = this.config.isRandom;
+    this.isRepeat = this.config.isRepeat;
   },
   nextSong: function () {
     this.currentIndex++;
@@ -309,7 +306,7 @@ const app = {
 
   start: function () {
     // gán cấu hình từ config vào ứng dụng
-    this.loadConfig()
+    this.loadConfig();
     // định nghĩa các thuộc tính trong object
     this.defineProperties();
 
@@ -324,8 +321,8 @@ const app = {
 
     this.render();
 
-    randomBtn.classList.toggle('active', this.isRandom)
-    repeatBtn.classList.toggle('active', this.isRepeat)
+    randomBtn.classList.toggle("active", this.isRandom);
+    repeatBtn.classList.toggle("active", this.isRepeat);
   },
 };
 
